@@ -69,8 +69,6 @@
 (defun merge-entities (e1 e2)
   (let ((l1 (entity-location e1))
         (l2 (entity-location e2))
-        (r1 (entity-radius e1))
-        (r2 (entity-radius e2))
         (m1 (entity-mass e1))
         (m2 (entity-mass e2))
         (v1 (entity-vector e1))
@@ -84,8 +82,8 @@
                    :vector (vec-weighted-average v1 m1 v2 m2)
                    :color (weighted-color-blend c1 m1 c2 m2))))
 
-(defun update-entity (e1)
-  (dolist (e2 (world-entities *world*))
+(defun update-entity (e1 entities)
+  (dolist (e2 entities)
     (unless (eq e1 e2)
       (let* ((l1 (entity-location e1))
              (l2 (entity-location e2))
@@ -138,13 +136,13 @@
 
 (defun update-world ()
   (setf (world-entities *world*)
-        (loop for entity in (world-entities *world*)
-              for (new-entity . new-entities-to-ignore)
-                = (multiple-value-list
-                   (unless (find entity entities-to-ignore)
-                     (update-entity entity)))
-              when new-entity
-                do (move-entity new-entity)
-                and collect new-entity
-              append new-entities-to-ignore into entities-to-ignore)))
+        (loop for list = (world-entities *world*) then (rest list)
+              for entity = (first list)
+              while entity
+              for (new-entity to-ignore)
+                = (multiple-value-list (update-entity entity list))
+              do (move-entity new-entity)
+              collect new-entity
+              do (alexandria:removef list to-ignore)
+              sum 1 into count)))
 
