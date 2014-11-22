@@ -2,24 +2,19 @@
 
 ;;; Colors
 
-(defvar *colors*
-  (let ((list (list sdl:*blue*
-                    sdl:*cyan*
-                    sdl:*red*
-                    sdl:*yellow*
-                    sdl:*green*
-                    sdl:*magenta*
-                    sdl:*white*)))
-    (setf (cdr (last list)) list)
-    list))
+(defun random-color ()
+  (sdl:color
+   :r (+ 6 (random 250))
+   :g (+ 6 (random 250))
+   :b (+ 6 (random 250))))
 
-(defun peek-color ()
-  (first *colors*))
+(defvar *next-color* (random-color))
 
 (defun pop-color ()
-  (prog1
-      (first *colors*)
-    (setf *colors* (cdr *colors*))))
+  (prog1 *next-color*
+    (setf *next-color* (random-color))))
+
+(defun peek-color () *next-color*)
 
 (defun color-blend (c1 c2)
   (sdl:color :r (/ (+ (sdl:r c1)
