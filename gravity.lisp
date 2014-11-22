@@ -23,7 +23,9 @@
       (:sdl-key-r
        (setf *new-vector* (vec 0 0)))
       (:sdl-key-p
-       (setf *draw-preview* (not *draw-preview*))))))
+       (setf *draw-preview* (not *draw-preview*)))
+      (:sdl-key-c
+       (setf (world-entities *world*) ())))))
 
 (defun game ()
   (sdl:with-init (sdl:sdl-init-video)

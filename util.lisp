@@ -21,6 +21,17 @@
       (first *colors*)
     (setf *colors* (cdr *colors*))))
 
+(defun color-blend (c1 c2)
+  (sdl:color :r (/ (+ (sdl:r c1)
+                      (sdl:r c2))
+                   2)
+             :g (/ (+ (sdl:g c1)
+                      (sdl:g c2))
+                   2)
+             :b (/ (+ (sdl:b c1)
+                      (sdl:b c2))
+                   2)))
+
 ;;; Vectors
 
 (deftype vec ()
@@ -58,6 +69,10 @@
 
 (defun distance-vec (v1 v2)
   (vec- v1 v2))
+
+(defun vec-average (v1 v2)
+  (vec-scale (vec+ v1 v2)
+             1/2))
 
 (defun vec-angle (v1 v2)
   (atan (- (vec-y v2) (vec-y v1))
