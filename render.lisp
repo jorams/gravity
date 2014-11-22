@@ -35,7 +35,7 @@
                   (< screen-height (- y radius)))
         (sdl:draw-filled-circle-* x
                                   y
-                                  (entity-radius e)
+                                  (round (entity-radius e))
                                   :color (entity-color e)))))
   ;; Preview for new planet
   (when *draw-preview*

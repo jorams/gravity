@@ -1,5 +1,9 @@
 (in-package #:gravity)
 
+;; Note: Should actually be 6.67384e-11
+(defparameter +g+ 6.67384e-8)
+(defparameter +force-multiplier+ 600)
+
 (defvar *world*)
 (defvar *new-coords* (vec 0 0))
 (defvar *new-radius* 20)
@@ -53,7 +57,7 @@
                         (location *new-coords*)
                         (vector (vec* *new-vector* (vec -1 -1)))
                         (color (pop-color))
-                        (mass *new-radius*))
+                        (mass (* 4/3 pi (expt radius 3))))
   (push (make-instance 'entity
                        :radius radius
                        :location location
@@ -75,30 +79,37 @@
         (c2 (entity-color e2)))
     (make-instance 'entity
                    :location (vec-average l1 l2)
-                   :radius (+ r1 r2)
+                   :radius (expt (/ (+ m1 m2) pi 4/3) 1/3)
                    :mass (+ m1 m2)
-                   :vector (vec-average v1 v2)
+                   :vector (vec-scale (vec-average (vec* v1 (vec m1 m1))
+                                                   (vec* v2 (vec m2 m2)))
+                                      (/ 1 (+ m1 m2)))
                    :color (color-blend c1 c2))))
 
-(defun update-entity (entity)
-  (dolist (e (world-entities *world*))
-    (unless (eq e entity)
-      (let* ((self (entity-location entity))
-             (other (entity-location e))
-             (distance (vec-distance self other))
-             (force (if (zerop distance)
+(defun update-entity (e1)
+  (dolist (e2 (world-entities *world*))
+    (unless (eq e1 e2)
+      (let* ((l1 (entity-location e1))
+             (l2 (entity-location e2))
+             (m1 (entity-mass e1))
+             (m2 (entity-mass e2))
+             (distance (vec-distance l1 l2))
+             (force (if (>= 0 distance)
                         0
-                        (/ (entity-mass e) distance 1000)))
-             (gravity (vec-scale (distance-vec self other) force)))
-        (if (> distance (+ (entity-radius entity)
-                           (entity-radius e)))
-            (setf (entity-vector entity)
-                  (vec+ (entity-vector entity) gravity))
+                        (* +force-multiplier+ +g+
+                           (/ (* m1 m2)
+                              (expt distance 2)))))
+             (gravity (vec-scale (vec-normalize (distance-vec l1 l2))
+                                 (/ force m1))))
+        (if (> distance (+ (entity-radius e1)
+                           (entity-radius e2)))
+            (setf (entity-vector e1)
+                  (vec+ (entity-vector e1) gravity))
             (progn
               (return-from update-entity
-                (values (merge-entities entity e)
-                        e)))))))
-  entity)
+                (values (merge-entities e1 e2)
+                        e2)))))))
+  e1)
 
 (defun move-entity (entity)
   (with-accessors ((location entity-location)
