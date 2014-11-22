@@ -21,7 +21,7 @@
       (:sdl-key-d
        (setf *clear-screen* (not *clear-screen*)))
       (:sdl-key-r
-       (setf *new-vector* (cons 0 0)))
+       (setf *new-vector* (vec 0 0)))
       (:sdl-key-p
        (setf *draw-preview* (not *draw-preview*))))))
 
@@ -50,16 +50,14 @@
            ;; Update radius
            ((sdl:mouse-right-p)
             (setf *new-radius*
-                  (round (vector-distance
-                          (cons x y)
+                  (round (vec-distance
+                          (vec x y)
                           *new-coords*))))
            ;; Update movement vector
            ((sdl:mouse-left-p)
             (setf *new-vector*
-                  (vector-scale (distance-vector
-                                 (cons x y)
-                                 *new-coords*)
-                                0.1)))))
+                  (vec-scale (distance-vec (vec x y) *new-coords*)
+                             0.1)))))
         (:mouse-button-up-event
          (:button button)
          (when (= button sdl:sdl-button-left)
