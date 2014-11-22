@@ -10,6 +10,7 @@
 (defvar *new-vector* (vec 0 0))
 
 (defvar *bouncep* nil)
+(defvar *auto-create-p* nil)
 
 (defclass world ()
   ((entities

@@ -27,7 +27,9 @@
       (:sdl-key-c
        (setf (world-entities *world*) ()))
       (:sdl-key-b
-       (setf *bouncep* (not *bouncep*))))))
+       (setf *bouncep* (not *bouncep*)))
+      (:sdl-key-a
+       (setf *auto-create-p* (not *auto-create-p*))))))
 
 (defun game ()
   (sdl:with-init (sdl:sdl-init-video)
@@ -58,11 +60,16 @@
                   (vec-scale (distance-vec (vec x y) *new-coords*)
                              0.1)))
            (t
-            (setf *new-coords* (vec x y)))))
+            (setf *new-coords* (vec x y))
+            (when *auto-create-p*
+              (create-entity)))))
         (:mouse-button-up-event
          (:button button)
-         (when (= button sdl:sdl-button-left)
-           (create-entity)))
+         (cond
+           ((= button sdl:sdl-button-left)
+            (create-entity))
+           ((= button sdl:sdl-button-middle)
+            (create-entity :vector (vec 0 0)))))
         (:idle () (tick))))))
 
 (defun start ()

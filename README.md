@@ -17,7 +17,7 @@ To get this thing started put it somewhere [Quicklisp][] can find it and execute
 (gravity:start)
 ```
 
-You can add new planets using the left mouse button. Drag to set the new planet's movement speed. You can set the size (and thereby the mass) of a planet by dragging the right mouse button. A preview of the new size and movement will be shown.
+You can add new planets using the left mouse button. Drag to set the new planet's movement speed. You can set the size (and thereby the mass) of a planet by dragging the right mouse button. A preview of the new size and movement will be shown. Regardless of the movement speed set, the middle mouse button creates a planet with a movement speed of 0.
 
 The following keybinds are available:
 
@@ -31,6 +31,7 @@ The following keybinds are available:
 | `r`               | Reset the new planet movement speed to 0              |
 | `c`               | Remove all planets                                    |
 | `b`               | Toggle bouncing at the screen's edge                  |
+| `a`               | Toggle planet auto-creation. (On every mouse move)    |
 
 [Quicklisp]: http://www.quicklisp.org/
 
