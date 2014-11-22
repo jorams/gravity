@@ -25,7 +25,9 @@
       (:sdl-key-p
        (setf *draw-preview* (not *draw-preview*)))
       (:sdl-key-c
-       (setf (world-entities *world*) ())))))
+       (setf (world-entities *world*) ()))
+      (:sdl-key-b
+       (setf *bouncep* (not *bouncep*))))))
 
 (defun game ()
   (sdl:with-init (sdl:sdl-init-video)
@@ -41,11 +43,6 @@
          (:w width :h height)
          (setf *screen-size* (vector width height))
          (sdl:resize-window width height))
-        (:mouse-button-down-event
-         (:button button :x x :y y)
-         (case button
-           ((sdl:sdl-button-left sdl:sdl-button-right)
-            (setf *new-coords* (vector x y)))))
         (:mouse-motion-event
          (:x x :y y)
          (cond
@@ -59,7 +56,9 @@
            ((sdl:mouse-left-p)
             (setf *new-vector*
                   (vec-scale (distance-vec (vec x y) *new-coords*)
-                             0.1)))))
+                             0.1)))
+           (t
+            (setf *new-coords* (vec x y)))))
         (:mouse-button-up-event
          (:button button)
          (when (= button sdl:sdl-button-left)

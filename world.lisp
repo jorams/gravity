@@ -5,6 +5,8 @@
 (defvar *new-radius* 20)
 (defvar *new-vector* (vec 0 0))
 
+(defvar *bouncep* nil)
+
 (defclass world ()
   ((entities
     :initarg :entities
@@ -99,14 +101,33 @@
   entity)
 
 (defun move-entity (entity)
-  (setf (entity-location entity)
-        (vec- (entity-location entity)
-              (entity-vector entity))))
+  (with-accessors ((location entity-location)
+                   (vector entity-vector))
+      entity
+    (case *bouncep*
+      ((nil)
+       (setf location (vec- location
+                            vector)))
+      (t
+       (setf location
+             (vec-max (vec 0 0)
+                      (vec-min (vec- location
+                                     vector)
+                               (vec (aref *screen-size* 0)
+                                    (aref *screen-size* 1)))))
+       (setf vector
+             (vec (if (or (zerop (vec-x location))
+                          (= (vec-x location)
+                             (aref *screen-size* 0)))
+                      (* -1 (vec-x vector))
+                      (vec-x vector))
+                  (if (or (zerop (vec-y location))
+                          (= (vec-y location)
+                             (aref *screen-size* 1)))
+                      (* -1 (vec-y vector))
+                      (vec-y vector))))))))
 
 (defun update-world ()
-  (unless (or (sdl:mouse-left-p) (sdl:mouse-right-p))
-    (setf *new-coords* (vec (sdl:mouse-x)
-                            (sdl:mouse-y))))
   (setf (world-entities *world*)
         (loop for entity in (world-entities *world*)
               for (new-entity . new-entities-to-ignore)

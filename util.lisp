@@ -74,6 +74,18 @@
   (vec-scale (vec+ v1 v2)
              1/2))
 
+(defun vec-min (v1 v2)
+  (vec (min (vec-x v1)
+            (vec-x v2))
+       (min (vec-y v1)
+            (vec-y v2))))
+
+(defun vec-max (v1 v2)
+  (vec (max (vec-x v1)
+            (vec-x v2))
+       (max (vec-y v1)
+            (vec-y v2))))
+
 (defun vec-angle (v1 v2)
   (atan (- (vec-y v2) (vec-y v1))
         (- (vec-x v2) (vec-x v1))))
