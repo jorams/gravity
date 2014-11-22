@@ -16,7 +16,9 @@ To get this thing started put it somewhere [Quicklisp][] can find it and execute
 (gravity:start)
 ```
 
-While it's running the red "planet" will follow your mouse. You can pause the game using `ESC`, after which you can quit using `q` or skip one frame ahead using `n`. At any time while the game is running you can press `d` to toggle clearing the screen every frame.
+You can add new planets using the left mouse button. Drag to set the new planet's movement speed. You can set the size (and thereby the mass) of a planet by dragging the right mouse button. A preview of the new size and movement will be shown.
+
+You can pause the game using `ESC`, after which you can quit using `q` or skip one frame ahead using `n`. At any time while the game is running you can press `d` to toggle clearing the screen every frame or `p` to toggle drawing the planet preview. Pressing `r` will reset the new planet's movement speed to 0.
 
 [Quicklisp]: http://www.quicklisp.org/
 

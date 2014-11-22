@@ -1,5 +1,28 @@
 (in-package #:gravity)
 
+;;; Colors
+
+(defvar *colors*
+  (let ((list (list sdl:*blue*
+                    sdl:*cyan*
+                    sdl:*red*
+                    sdl:*yellow*
+                    sdl:*green*
+                    sdl:*magenta*
+                    sdl:*white*)))
+    (setf (cdr (last list)) list)
+    list))
+
+(defun peek-color ()
+  (first *colors*))
+
+(defun pop-color ()
+  (prog1
+      (first *colors*)
+    (setf *colors* (cdr *colors*))))
+
+;;; Vectors
+
 (defun vector+ (v1 v2)
   (cons (+ (car v1) (car v2))
         (+ (cdr v1) (cdr v2))))

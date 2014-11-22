@@ -1,6 +1,9 @@
 (in-package #:gravity)
 
 (defvar *world*)
+(defvar *new-coords* (cons 0 0))
+(defvar *new-radius* 20)
+(defvar *new-vector* (cons 0 0))
 
 (defclass world ()
   ((entities
@@ -34,29 +37,28 @@
      :initform NIL
      :accessor entity-solid?)))
 
-(defun init-world ()
-  (setf *world* (make-instance 'world)
-        (world-entities *world*)
-        (list (make-instance 'entity
-                             :radius 20
-                             :location (cons 1500 800)
-                             :color sdl:*blue*
-                             :mass 10)
-              (make-instance 'entity
-                             :radius 10
-                             :location (cons 300 200)
-                             :mass 1
-                             :vector '(0 . 1))
-              (make-instance 'entity
-                             :radius 30
-                             :location (cons 1000 100)
-                             :color sdl:*green*
-                             :mass 50)
-              (make-instance 'entity
-                             :radius 30
-                             :location (cons 400 200)
-                             :color sdl:*red*
-                             :mass 150))))
+(defmacro with-world ((&optional (world '(make-instance 'world
+                                          :entities ())))
+                      &body body)
+  `(let ((*world* ,world)
+         (*new-coords* (cons 0 0))
+         (*new-radius* 20)
+         (*new-vector* (cons 0 0)))
+     ,@body))
+
+(defun create-entity (&key
+                        (radius *new-radius*)
+                        (location *new-coords*)
+                        (vector (vector* *new-vector* (cons -1 -1)))
+                        (color (pop-color))
+                        (mass *new-radius*))
+  (push (make-instance 'entity
+                       :radius radius
+                       :location location
+                       :vector vector
+                       :color color
+                       :mass mass)
+        (world-entities *world*)))
 
 (defun update-entity (entity)
   (if (entity-solid? entity)
@@ -67,24 +69,20 @@
           (let* ((other (entity-location e))
                  (force (/ (entity-mass e) (vector-distance self other) 1000))
                  (gravity (vector-scale (distance-vector self other) force)))
-            ;(format t "~S~%" gravity)
             (setf (entity-vector entity)
                   (vector+ (entity-vector entity) gravity)))))))
   entity)
 
 (defun move-entity (entity)
-  (if (eq (entity-color entity) sdl:*red*)
-    (setf (entity-location entity)
-          (cons (sdl:mouse-x) (sdl:mouse-y)))
-    (setf (entity-location entity)
-          (vector- (entity-location entity)
-                   (entity-vector entity))))
-  #+NIL (setf (entity-location entity)
-	(vector- (entity-location entity)
-		 (entity-vector entity)))
+  (setf (entity-location entity)
+        (vector- (entity-location entity)
+                 (entity-vector entity)))
   entity)
 
 (defun update-world ()
+  (unless (or (sdl:mouse-left-p) (sdl:mouse-right-p))
+    (setf *new-coords* (cons (sdl:mouse-x)
+                             (sdl:mouse-y))))
   (setf (world-entities *world*)
         (mapcar #'move-entity
                 (mapcar #'update-entity (world-entities *world*)))))
