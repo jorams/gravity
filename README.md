@@ -6,6 +6,7 @@ This is a little toy probject to create a gravity-like simulation in Common Lisp
 
 - [LISPBUILDER-SDL](https://code.google.com/p/lispbuilder/wiki/LispbuilderSDL) (MIT)
 - [Bordeaux Threads](http://common-lisp.net/project/bordeaux-threads/) (MIT)
+- [Alexandria](http://common-lisp.net/project/alexandria/) (Public Domain)
 
 ## Quickstart
 
