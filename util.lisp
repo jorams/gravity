@@ -1,5 +1,12 @@
 (in-package #:gravity)
 
+(defun average (x1 x2)
+  (/ (+ x1 x2) 2))
+
+(defun weighted-average (x1 w1 x2 w2)
+  (/ (+ (* x1 w1) (* x2 w2))
+     (+ w1 w2)))
+
 ;;; Colors
 
 (defun random-color ()
@@ -16,16 +23,16 @@
 
 (defun peek-color () *next-color*)
 
+(defun weighted-color-blend (c1 w1 c2 w2)
+  (sdl:color :r (weighted-average (sdl:r c1) w1
+                                  (sdl:r c2) w2)
+             :g (weighted-average (sdl:g c1) w1
+                                  (sdl:g c2) w2)
+             :b (weighted-average (sdl:b c1) w1
+                                  (sdl:b c2) w2)))
+
 (defun color-blend (c1 c2)
-  (sdl:color :r (/ (+ (sdl:r c1)
-                      (sdl:r c2))
-                   2)
-             :g (/ (+ (sdl:g c1)
-                      (sdl:g c2))
-                   2)
-             :b (/ (+ (sdl:b c1)
-                      (sdl:b c2))
-                   2)))
+  (weighted-color-blend c1 1 c2 1))
 
 ;;; Vectors
 
@@ -68,6 +75,11 @@
 (defun vec-average (v1 v2)
   (vec-scale (vec+ v1 v2)
              1/2))
+
+(defun vec-weighted-average (v1 w1 v2 w2)
+  (vec-scale (vec+ (vec* v1 (vec w1 w1))
+                   (vec* v2 (vec w2 w2)))
+             (/ 1 (+ w1 w2))))
 
 (defun vec-min (v1 v2)
   (vec (min (vec-x v1)

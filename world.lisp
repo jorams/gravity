@@ -78,13 +78,11 @@
         (c1 (entity-color e1))
         (c2 (entity-color e2)))
     (make-instance 'entity
-                   :location (vec-average l1 l2)
+                   :location (vec-weighted-average l1 m1 l2 m2)
                    :radius (expt (/ (+ m1 m2) pi 4/3) 1/3)
                    :mass (+ m1 m2)
-                   :vector (vec-scale (vec-average (vec* v1 (vec m1 m1))
-                                                   (vec* v2 (vec m2 m2)))
-                                      (/ 1 (+ m1 m2)))
-                   :color (color-blend c1 c2))))
+                   :vector (vec-weighted-average v1 m1 v2 m2)
+                   :color (weighted-color-blend c1 m1 c2 m2))))
 
 (defun update-entity (e1)
   (dolist (e2 (world-entities *world*))
