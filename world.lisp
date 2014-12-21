@@ -83,29 +83,30 @@
                    :vector (vec-weighted-average v1 m1 v2 m2)
                    :color (weighted-color-blend c1 m1 c2 m2))))
 
+(defun entity-distance (e1 e2)
+  (vec-distance (entity-location e1) (entity-location e2)))
+
+(defun entity-distance-vec (e1 e2)
+  (distance-vec (entity-location e1) (entity-location e2)))
+
+(defun entity-gravity (e1 e2)
+  (let* ((m1 (entity-mass e1))
+         (m2 (entity-mass e2))
+         (distance (entity-distance e1 e2))
+         (force (if (>= 0 distance)
+                    0
+                    (* +force-multiplier+ +g+
+                       (/ (* m1 m2)
+                          (expt distance 2))))))
+    (vec-scale (vec-normalize (entity-distance-vec e1 e2))
+               (/ force m1))))
+
 (defun update-entity (e1 entities)
   (dolist (e2 entities)
     (unless (eq e1 e2)
-      (let* ((l1 (entity-location e1))
-             (l2 (entity-location e2))
-             (m1 (entity-mass e1))
-             (m2 (entity-mass e2))
-             (distance (vec-distance l1 l2))
-             (force (if (>= 0 distance)
-                        0
-                        (* +force-multiplier+ +g+
-                           (/ (* m1 m2)
-                              (expt distance 2)))))
-             (gravity (vec-scale (vec-normalize (distance-vec l1 l2))
-                                 (/ force m1))))
-        (if (> distance (+ (entity-radius e1)
-                           (entity-radius e2)))
-            (setf (entity-vector e1)
-                  (vec+ (entity-vector e1) gravity))
-            (progn
-              (return-from update-entity
-                (values (merge-entities e1 e2)
-                        e2)))))))
+      (let* ((gravity (entity-gravity e1 e2)))
+        (setf (entity-vector e1)
+              (vec+ (entity-vector e1) gravity)))))
   e1)
 
 (defun move-entity (entity)
@@ -135,15 +136,40 @@
                       (* -1 (vec-y vector))
                       (vec-y vector))))))))
 
-(defun update-world ()
-  (setf (world-entities *world*)
-        (loop for list = (world-entities *world*) then (rest list)
-              for entity = (first list)
-              while entity
-              for (new-entity to-ignore)
-                = (multiple-value-list (update-entity entity list))
-              do (move-entity new-entity)
-              collect new-entity
-              do (alexandria:removef list to-ignore)
-              sum 1 into count)))
+(defun entities-collide-p (e1 e2)
+  (< (entity-distance e1 e2)
+     (+ (entity-radius e1)
+        (entity-radius e2))))
 
+(defun merge-in-range (subject entities)
+  (let ((not-merged
+          (loop for entity in entities
+                when (and (not (eq entity subject))
+                          (entities-collide-p subject entity))
+                  do (setf subject (merge-entities subject entity))
+                else if (not (eq entity subject)) collect entity)))
+    (values subject not-merged)))
+
+(defun update-gravity (world)
+  (setf (world-entities world)
+        (loop for entity in (world-entities *world*)
+              for new-entity = (update-entity entity (world-entities *world*))
+              do (move-entity new-entity)
+              collect new-entity)))
+
+(defun merge-entities-in-world (world)
+  (setf (world-entities world)
+        (loop with entities = (world-entities *world*)
+              with processed-entities = ()
+              for entity = (first entities)
+              until (or (null entity)
+                        (member entity processed-entities))
+              do (multiple-value-bind (result not-merged)
+                     (merge-in-range entity entities)
+                   (push result processed-entities)
+                   (setf entities (append not-merged (list result))))
+              finally (return entities))))
+
+(defun update-world ()
+  (merge-entities-in-world *world*)
+  (update-gravity *world*))
